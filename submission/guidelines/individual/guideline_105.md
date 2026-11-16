@@ -24,7 +24,7 @@ annotation_project:
     timeline: "4 giờ thực hành (Pha 0 - Pha 6)"
 
   label_schema:
-    # Giữ tương thích v0 (6 lớp), đồng thời đề xuất bổ sung bus & tuk_tuk tại cuộc họp Pha 2
+    # Đồng bộ 9 lớp theo cấu hình CVAT và taxonomy v1.0 (8 lớp đối tượng có đủ 3 thuộc tính + ignore_region)
     labels:
       - label: "car"
         definition: "Xe ô tô chở khách dưới 9 chỗ (sedan, hatchback, SUV, crossover, wagon, taxi)."
@@ -61,19 +61,26 @@ annotation_project:
           negative: ["img_017.jpg (tượng đồng cưỡi ngựa)", "img_018.jpg (ảnh chân dung trên biển quảng cáo)", "img_033.jpg (ma-nơ-canh trong tủ kính)", "img_019.jpg (hình nộm chuột DangerMouse)"]
         edge_cases: ["img_011.jpg (nhân vật Predator đứng trên bệ đỏ -> loại vì là tượng/mô hình trưng bày, gắn can_review nếu nghi là người hóa trang)", "img_014.jpg (người đi xe máy bị nhòe chuyển động -> vẫn gán)"]
 
-      - label: "bus (Đề xuất thêm ở Pha 2)"
+      - label: "bus"
         definition: "Xe buýt công cộng hoặc xe khách cỡ trung/lớn thân liền khối, cửa sổ hàng dài chuyên chở nhiều hành khách."
         examples:
           positive: ["img_009.jpg (xe khách/buýt màu kem 75H-2944)", "img_031.jpg (xe buýt số 62)", "img_037.jpg (hai xe buýt xanh GO Transit)", "img_040.jpg (xe buýt số 511)"]
           negative: ["img_005.jpg (xe van bạc 51LD-70-65 -> van)"]
-        edge_cases: ["Nếu Pha 2 không mở thêm lớp bus, tạm quy về van hoặc truck theo thống nhất nhóm; nhưng khuyến nghị tách lớp bus để tránh nhầm van/truck."]
+        edge_cases: ["Đầy đủ 3 thuộc tính occluded_level, truncated, can_review giống các lớp xe khác."]
 
-      - label: "tuk_tuk (Đề xuất thêm ở Pha 2)"
+      - label: "three_wheeler"
         definition: "Xe ba bánh có động cơ chuyên chở khách/hàng (tuk-tuk Thái Lan, auto-rickshaw Ấn Độ) có khoang mui trần/mui bạt hở."
         examples:
           positive: ["img_004.jpg (2 xe tuk-tuk xanh)", "img_016.jpg (2 xe tuk-tuk)", "img_035.jpg (xe auto-rickshaw vàng chở bao tải)", "img_040.jpg (tuk-tuk vàng-xanh)"]
-          negative: ["img_023.jpg, img_034.jpg (xích lô đạp không động cơ -> loại bỏ)", "img_022.jpg (mô tô sidecar -> motorcycle)"]
-        edge_cases: ["img_035.jpg (bao tải chất vượt nóc -> box tuk_tuk chỉ ôm khung xe và mui cứng, không kéo theo khối bao tải rời phía trên)."]
+          negative: ["img_023.jpg, img_034.jpg (xích lô đạp không động cơ -> loại bỏ khỏi lớp xe)", "img_022.jpg (mô tô sidecar -> motorcycle)"]
+        edge_cases: ["img_035.jpg (bao tải chất vượt nóc -> box three_wheeler chỉ ôm khung xe và mui cứng, không kéo theo khối bao tải rời phía trên)."]
+
+      - label: "bicycle"
+        definition: "Xe đạp hai bánh vận hành bằng bàn đạp không có động cơ (tách riêng với xe máy motorcycle và xích lô ba bánh)."
+        examples:
+          positive: ["img_003.jpg (xe đạp nam thanh niên dắt)", "img_010.jpg (xe đạp chở sọt phật thủ)", "img_029.jpg (xe đạp người chở thanh nhôm)", "img_039.jpg (xe đạp trên phố)"]
+          negative: ["img_006.jpg, img_023.jpg, img_034.jpg (xích lô đạp 3 bánh -> ngoài phạm vi xe, chỉ gán person)", "img_005.jpg (xe tay ga -> motorcycle)"]
+        edge_cases: ["Áp dụng đủ 3 thuộc tính occluded_level, truncated, can_review; tách riêng box person cho người đạp xe theo R-02."]
 
       - label: "ignore_region"
         definition: "Vùng bỏ qua không gán từng cá thể: đám đông người dày đặc, bãi xe chồng lấp hoặc cụm đối tượng có chiều cao < 20 px."
@@ -86,20 +93,20 @@ annotation_project:
     document: "submission/guidelines/individual/guideline_105.md"
     key_rules:
       - "R-01: Box ôm sát 100% phần nhìn thấy của vật (Sai số biên <= 2-3 px); không suy đoán phần bị che khuất."
-      - "R-02: Tách độc lập box person và box motorcycle cho người đi xe máy/xích lô/xe đạp."
+      - "R-02: Tách độc lập box person và box phương tiện (motorcycle / three_wheeler / bicycle) cho người ngồi/lái trên xe."
       - "R-03: Xe chở xe gán đồng thời 1 box truck cho xe chở và từng box car cho mỗi ô tô con trên sàn."
       - "R-04: Không kéo box phương tiện ôm hàng hóa rời quá khổ (bao tải, thanh nhôm); phụ kiện gắn cứng theo thân xe (nắp thùng Master 75) được tính vào xe."
       - "R-05: Loại bỏ hoàn toàn vật không thật (tượng, ma-nơ-canh, đồ chơi, ảnh in/biển quảng cáo, vỏ xe rỗng trưng bày)."
       - "R-06: Loại bỏ ảnh phản chiếu trong gương/kính/vũng nước và các bộ phận thuộc xe chủ (ego-vehicle)."
-      - "R-07: Loại bỏ phương tiện không động cơ (xe đạp, xích lô) khỏi taxonomy xe, nhưng vẫn gán person cho người điều khiển/hành khách."
+      - "R-07: Xe đạp hai bánh gán lớp bicycle (nếu thuộc taxonomy 9 lớp); xích lô 3 bánh không động cơ loại bỏ khỏi lớp xe nhưng vẫn gán person."
       - "R-08: Vật cao < 20 px hoặc cụm chồng lấp dày đặc không tách được -> bọc bằng ignore_region."
       - "R-09: Vật bị nhòe chuyển động (motion blur) vẫn gán nếu nhận diện chắc chắn lớp; ôm theo thân vật thực, không ôm vệt mờ kéo dài."
-      - "R-10: Bất kỳ ca biên nào chưa có tiền lệ trong v1.0 -> vẽ box tốt nhất và bật can_review=true, hoặc ghi submission/qc/image_issues.csv nếu chưa vẽ được."
+      - "R-10: Bất kỳ ca biên nào chưa có tiền lệ -> vẽ box tốt nhất và bật can_review=true, hoặc ghi submission/qc/image_issues.csv nếu chưa vẽ được."
     decision_tree:
       - condition: "Vật có phải đối tượng thật (không phải tượng, ma-nơ-canh, đồ chơi, tranh in, phản chiếu, bộ phận xe chủ)?"
         then: "Nếu KHÔNG -> Bỏ qua (không gán). Nếu CÓ -> Đi tiếp."
-      - condition: "Vật có thuộc lớp trong taxonomy (person, car, truck, van, motorcycle, [bus, tuk_tuk]) không?"
-        then: "Nếu KHÔNG (xe đạp, xích lô, động vật) -> Bỏ qua phương tiện (nhưng vẫn xét người ngồi trên nó). Nếu CÓ -> Đi tiếp."
+      - condition: "Vật có thuộc lớp trong taxonomy 9 lớp (person, car, truck, van, motorcycle, three_wheeler, bus, bicycle) không?"
+        then: "Nếu KHÔNG (xích lô đạp 3 bánh, động vật) -> Bỏ qua phương tiện (nhưng vẫn xét người ngồi trên nó). Nếu CÓ -> Đi tiếp."
       - condition: "Chiều cao phần nhìn thấy >= 20 px VÀ tách biệt được ranh giới cá thể?"
         then: "Nếu KHÔNG (< 20 px hoặc đám đông/bãi xe dính chùm) -> Gộp vào ignore_region. Nếu CÓ -> Vẽ box riêng theo R-01..R-04 và gán đủ 3 thuộc tính."
 
@@ -151,21 +158,22 @@ annotation_project:
 
 ### 2.1. Bảng định nghĩa Lớp (Classes)
 
-> **Lưu ý tương thích hệ thống:** `submission/taxonomy.json` hiện tại (v0) có 6 lớp: `car`, `truck`, `van`, `motorcycle`, `person`, `ignore_region`. Trong Pha 1 cá nhân, tôi giữ nguyên 6 lớp nền tảng để phản ánh đúng v0, đồng thời đánh dấu rõ **2 lớp đề xuất bổ sung ở Pha 2 (`bus`, `tuk_tuk`)** dựa trên phép thử *"Mô hình 2D có phải đoán ra lớp này khi suy luận không?"*.
+> **Cập nhật đồng bộ 9 lớp (`taxonomy.json` `v1.0`):** Bộ lớp chuẩn hóa gồm `car`, `truck`, `van`, `motorcycle`, `person`, `ignore_region`, `three_wheeler`, `bus`, `bicycle`. Tất cả **8 lớp đối tượng** (trừ `ignore_region`) đều có đủ 3 thuộc tính `occluded_level`, `truncated`, `can_review`.
 
 | Lớp | Định nghĩa (1–2 câu) | Tiêu chí nhận diện (Criteria) | Ví dụ dương tính (Positive — kèm ID ảnh) | Phản ví dụ / Dễ nhầm với (Negative) |
 |---|---|---|---|---|
 | `car` | Xe ô tô chở khách dưới 9 chỗ ngồi (sedan, hatchback, coupe, SUV, crossover, station wagon, taxi). | Có 4 bánh, thân xe thấp hoặc gầm cao dạng SUV, khoang hành khách và khoang động cơ/hành lý liền khối, không có thùng tải hở phía sau. | Ô tô đen Honda Civic (`img_023.jpg`); Mazda CX-5 bạc (`img_012.jpg`); 8 ô tô con trên sàn xe chở (`img_002.jpg`); xe cổ AMC Pacer (`img_024.jpg`). | Xe mô hình đồ chơi trong tủ kính (`img_038.jpg`); xe phản chiếu trong gương (`img_020.jpg`); vỏ xe rỗng trên nóc (`img_024.jpg`); xe bán tải có thùng hàng rời (`truck`). |
 | `truck` | Xe cơ giới thiết kế chở hàng có khoang/thùng hàng tách biệt cabin, xe đầu kéo, xe chở xe hoặc xe bán tải (pickup). | Có cabin riêng và thùng hàng hở/kín phía sau tách biệt thân cabin, hoặc là dòng pickup truck (dù có gắn nắp thùng cứng). | Bán tải Suzuki (`img_001.jpg`); xe đầu kéo chở 8 ô tô (`img_002.jpg`); xe tải thùng Isuzu (`img_007.jpg`); xe tải nhẹ thùng bạt (`img_036.jpg`); bán tải gắn nắp Master 75 (`img_037.jpg`). | Tượng đài xe bán tải bằng đá (`img_027.jpg`); xe van thân liền (`img_005.jpg`); bao tải hàng hóa chất rời bên ngoài thân xe (`img_035.jpg`). |
 | `van` | Xe thùng kín thân liền khối cỡ nhỏ hoặc trung (6–16 chỗ hoặc xe chở hàng nhẹ dạng minibus/MPV khoang kín). | Cabin và khoang sau nối liền một khối vuông vức (không phân tách đầu kéo/thùng rời như `truck`), thân ngắn hơn `bus`. | Xe van bạc `51LD-70-65` (`img_005.jpg`); xe van trắng-xám (`img_016.jpg`); xe van cứu thương trắng ở hậu cảnh (`img_011.jpg`). | Xe buýt thân dài nhiều hàng cửa sổ (`img_009.jpg`, `img_037.jpg`); bán tải gắn nắp thùng rời (`img_037.jpg` -> `truck`). |
-| `motorcycle` | Xe cơ giới hai bánh (hoặc ba bánh dạng mô tô gắn sidecar) chạy bằng động cơ đốt trong hoặc động cơ điện. | Có động cơ, tay lái ghi-đông, lốp bản rộng hơn xe đạp, có biển số/ống xả/yếm xe. | Xe tay ga và xe số trên phố (`img_005.jpg`, `img_008.jpg`, `img_030.jpg`); Vespa xanh (`img_016.jpg`); mô tô gắn sidecar (`img_022.jpg`); xe máy độ (`img_011.jpg`). | Xe đạp thường không động cơ (`img_003.jpg`, `img_010.jpg`, `img_029.jpg`); xích lô đạp (`img_006.jpg`, `img_023.jpg`); xe tuk-tuk 3 bánh có mái che (`img_004.jpg`). |
+| `motorcycle` | Xe cơ giới hai bánh (hoặc ba bánh dạng mô tô gắn sidecar) chạy bằng động cơ đốt trong hoặc động cơ điện. | Có động cơ, tay lái ghi-đông, lốp bản rộng hơn xe đạp, có biển số/ống xả/yếm xe. | Xe tay ga và xe số trên phố (`img_005.jpg`, `img_008.jpg`, `img_030.jpg`); Vespa xanh (`img_016.jpg`); mô tô gắn sidecar (`img_022.jpg`); xe máy độ (`img_011.jpg`). | Xe đạp thường không động cơ (`img_003.jpg`, `img_039.jpg` -> `bicycle`); xích lô đạp (`img_006.jpg`, `img_023.jpg`); xe tuk-tuk 3 bánh có mái che (`img_004.jpg` -> `three_wheeler`). |
 | `person` | Người thật đang hiện diện vật lý trong không gian ảnh (người đi bộ, đứng, ngồi, người lái hoặc hành khách trên mọi loại xe). | Cơ thể người thật bằng xương thịt, tách biệt khỏi vật trưng bày/ảnh in. | Phụ nữ đứng cạnh bán tải và khách ngồi quán (`img_001.jpg`); người đi xe máy (`img_005.jpg`, `img_026.jpg`); người đi bộ (`img_014.jpg`, `img_025.jpg`); người đạp xích lô (`img_023.jpg`, `img_034.jpg`). | Tượng đồng (`img_017.jpg`); ma-nơ-canh (`img_033.jpg`); ảnh trên biển quảng cáo (`img_018.jpg`, `img_030.jpg`, `img_040.jpg`); nhân vật bông DangerMouse (`img_019.jpg`); tượng Predator (`img_011.jpg`). |
-| `bus` *(Đề xuất thêm Pha 2)* | Xe buýt công cộng hoặc xe khách thân dài chuyên chở hành khách (> 16 chỗ). | Thân xe chữ nhật dài, trần cao, dãy cửa sổ dài dọc thân, cửa lên xuống hành khách cỡ lớn. | Xe khách/buýt kem `75H-2944` (`img_009.jpg`); xe buýt số 62 (`img_031.jpg`); hai xe buýt xanh GO Transit (`img_037.jpg`); xe buýt số 511 (`img_040.jpg`). | Xe van cỡ nhỏ dưới 16 chỗ (`img_005.jpg` -> `van`). *(Nếu nhóm không thêm `bus` ở Pha 2, thống nhất xếp tạm vào `truck` hoặc `van` và ghi rõ trong taxonomy).* |
-| `tuk_tuk` *(Đề xuất thêm Pha 2)* | Xe cơ giới 3 bánh có khoang hở và mái che đặc trưng chở khách/hàng (tuk-tuk, auto-rickshaw). | 1 bánh trước + 2 bánh sau, buồng lái hở gắn mái bạt/kim loại, có động cơ và biển số. | Hai xe tuk-tuk xanh (`img_004.jpg`); 2 xe tuk-tuk (`img_016.jpg`); xe auto-rickshaw vàng chở bao tải (`img_035.jpg`); tuk-tuk (`img_040.jpg`). | Xích lô đạp không động cơ (`img_006.jpg`, `img_023.jpg`); mô tô gắn sidecar lệch bên (`img_022.jpg` -> `motorcycle`). |
+| `three_wheeler` | Xe cơ giới 3 bánh có khoang hở và mái che đặc trưng chở khách/hàng (tuk-tuk, auto-rickshaw). | 1 bánh trước + 2 bánh sau, buồng lái hở gắn mái bạt/kim loại, có động cơ và biển số. | Hai xe tuk-tuk xanh (`img_004.jpg`); 2 xe tuk-tuk (`img_016.jpg`); xe auto-rickshaw vàng chở bao tải (`img_035.jpg`); tuk-tuk (`img_040.jpg`). | Xích lô đạp không động cơ (`img_006.jpg`, `img_023.jpg`); mô tô gắn sidecar lệch bên (`img_022.jpg` -> `motorcycle`). |
+| `bus` | Xe buýt công cộng hoặc xe khách thân dài chuyên chở hành khách (> 16 chỗ). | Thân xe chữ nhật dài, trần cao, dãy cửa sổ dài dọc thân, cửa lên xuống hành khách cỡ lớn. | Xe khách/buýt kem `75H-2944` (`img_009.jpg`); xe buýt số 62 (`img_031.jpg`); hai xe buýt xanh GO Transit (`img_037.jpg`); xe buýt số 511 (`img_040.jpg`). | Xe van cỡ nhỏ dưới 16 chỗ (`img_005.jpg` -> `van`). |
+| `bicycle` | Xe đạp hai bánh vận hành bằng bàn đạp không có động cơ. | Khung xe đạp mảnh, hai bánh nhỏ, bàn đạp, không có động cơ hay biển số. | Xe đạp trong phố (`img_009.jpg`, `img_034.jpg`, `img_039.jpg`), xe đạp chở hàng (`img_010.jpg`), xe đạp chở thanh nhôm (`img_029.jpg`). | Xe máy/tay ga (`motorcycle`); xích lô ba bánh không động cơ (`img_023.jpg`). |
 | `ignore_region` | Vùng không gian chứa đám đông người/xe dính chùm không tách được từng vật, hoặc cụm vật có chiều cao `< 20 px`. | Không đại diện cho 1 đối tượng đơn lẻ; mọi bỏ sót bên trong vùng này không bị tính là lỗi khi đo IAA/QC. | Đám đông khán giả sau rào chắn (`img_019.jpg`); biển xe máy ở xa (`img_021.jpg`); hàng xe máy đậu sát phía sau (`img_030.jpg`); hàng người chờ xe buýt xếp chồng (`img_032.jpg`). | Các xe máy/người ở tiền cảnh dù nhiều nhưng nhìn rõ biên từng cá thể và cao `>= 20 px` (`img_005.jpg`, `img_008.jpg`). |
 
 ### 2.2. Xử lý đối tượng ngoài Taxonomy
-- **Phương tiện không động cơ (`xe đạp`, `xích lô`, `xe kéo tay`):** **Không gán box cho phương tiện** vì phạm vi mô hình mục tiêu là người và phương tiện cơ giới đường bộ (tránh làm loãng phân bố lớp `motorcycle` bằng các khung xe đạp mảnh). Tuy nhiên, **vẫn gán `person`** cho người điều khiển và hành khách ngồi trên xe đạp/xích lô (`img_003.jpg`, `img_006.jpg`, `img_010.jpg`, `img_023.jpg`, `img_029.jpg`, `img_034.jpg`, `img_039.jpg`).
+- **Xích lô đạp 3 bánh không động cơ (`img_006.jpg`, `img_023.jpg`, `img_034.jpg`, `img_039.jpg`):** **Không gán box cho khung xích lô** (tránh nhầm với `three_wheeler` có động cơ và `bicycle` 2 bánh). Tuy nhiên, **vẫn gán `person`** cho người đạp xích lô và hành khách nhìn thấy.
 - **Động vật (chó, chim hải âu...), vật cản giao thông (cọc tiêu cam, thùng rác), hàng hóa rời:** **Không gán** (`img_004.jpg` cọc tiêu, `img_009.jpg` chó nhỏ bên lề, `img_017.jpg` chim hải âu).
 - **Vật giả / bản sao tĩnh / phản chiếu:** **Không gán** theo quy tắc `R-05` và `R-06`.
 
@@ -205,7 +213,7 @@ annotation_project:
 - **`R-06` — Loại trừ Ảnh phản chiếu và Xe chủ (Reflections & Ego-Vehicle):**
   - Không gán người/xe nhìn thấy qua gương chiếu hậu (`img_020.jpg`), phản chiếu trên mặt đường ướt (`img_013.jpg`, `img_015.jpg`, `img_031.jpg`) hoặc phản chiếu qua cửa kính tòa nhà/tủ hàng (`img_033.jpg`, `img_038.jpg`).
   - Không gán thân vỏ, gương chiếu hậu, kính chắn gió của chính phương tiện đang gắn camera (`img_020.jpg` — cụm gương và cánh cửa xe chụp ảnh; `img_040.jpg` — cặp gương chiếu hậu nhô lên từ xe gắn camera ở mép dưới).
-- **`R-07` — Phương tiện không động cơ (`xe đạp`, `xích lô`):** Loại bỏ khung xe đạp và khung xe xích lô khỏi toàn bộ các lớp xe. Chỉ vẽ `person` cho người đạp xe và hành khách (`img_003.jpg`, `img_006.jpg`, `img_009.jpg`, `img_010.jpg`, `img_023.jpg`, `img_029.jpg`, `img_034.jpg`, `img_039.jpg`).
+- **`R-07` — Xe đạp hai bánh & Xích lô không động cơ:** Với `xe đạp` hai bánh (`img_003.jpg`, `img_009.jpg`, `img_010.jpg`, `img_029.jpg`, `img_034.jpg`, `img_039.jpg`), gán lớp `bicycle` (với đủ 3 thuộc tính) tách biệt khỏi người lái `person` theo `R-02`. Riêng khung **xích lô đạp 3 bánh** (`img_006.jpg`, `img_023.jpg`) vẫn loại bỏ khỏi các lớp xe, chỉ gán `person` cho người đạp và hành khách.
 - **`R-08` — Ngưỡng vật nhỏ (`min_box_height_px = 20`) và Đám đông (`ignore_region`):**
   - Bất kỳ người hoặc phương tiện đơn lẻ nào có chiều cao phần nhìn thấy `< 20 px` trên ảnh gốc (`1024 px`) thì **không gán box cá thể**. Nếu đứng thành cụm nhiều vật nhỏ ở xa (`img_008.jpg`, `img_013.jpg`, `img_021.jpg`, `img_025.jpg`, `img_031.jpg`), vẽ `1 box ignore_region` bao gọn cụm đó.
   - Nếu đám đông người hoặc dãy xe máy đậu sát nhau có chiều cao `>= 20 px` nhưng che khuất chồng chéo nặng đến mức hai người gán không thể đồng thuận ranh giới từng vật (`img_019.jpg` khán giả sau rào, `img_021.jpg` đoàn xe máy giữa-xa, `img_030.jpg` hàng xe máy phía sau, `img_032.jpg` hàng người chờ xe buýt xếp chồng): Gán từng cá thể tách rõ ở hàng ngoài cùng, phần chồng lấp sâu phía trong bọc bằng `ignore_region`.
@@ -382,7 +390,8 @@ Theo `TEAM.md`, nhóm `T012` có **5 thành viên (`101–105`)**, do đó `spli
 | Phiên bản | Ngày | Người thực hiện | Thay đổi chính | Lý do (Ca ảnh tham chiếu) |
 |---|---|---|---|---|
 | `v0` | — | Giảng viên | Khởi tạo 6 lớp, mô tả thuộc tính định tính, chưa có quy tắc ca khó | Bản starter (`guideline/guideline_v0_starter.md`) |
-| `v0.1-105` | `2026-11-16` | `105` | Định lượng `occluded_level` (0/1–30/31–70/>70%) & `truncated`; bổ sung bộ quy tắc `R-01`–`R-10`, đề xuất `bus` & `tuk_tuk`, cây quyết định, bảng ca khó 40 ảnh, quy trình QC (Cohen/Fleiss Kappa, 4 tầng review) & đào tạo người gán theo chuẩn `ground-truth-collector` | Khảo sát toàn bộ `img_001.jpg`–`img_040.jpg` phát hiện lỗ hổng ở xe chở xe (`img_002`), tuk-tuk (`img_004`, `img_035`), xe buýt (`img_009`, `img_037`), tượng/ma-nơ-canh/đồ chơi (`img_017`, `img_027`, `img_033`, `img_038`), phản chiếu (`img_020`), hàng quá khổ (`img_029`, `img_035`), đám đông (`img_021`, `img_032`) |
+| `v0.1-105` | `2026-11-16` | `105` | Định lượng `occluded_level` (0/1–30/31–70/>70%) & `truncated`; bổ sung bộ quy tắc `R-01`–`R-10`, cây quyết định, bảng ca khó 40 ảnh, quy trình QC (Cohen/Fleiss Kappa, 4 tầng review) & đào tạo người gán theo chuẩn `ground-truth-collector` | Khảo sát toàn bộ `img_001.jpg`–`img_040.jpg` phát hiện lỗ hổng ở xe chở xe (`img_002`), tuk-tuk (`img_004`, `img_035`), xe buýt (`img_009`, `img_037`), tượng/ma-nơ-canh/đồ chơi (`img_017`, `img_027`, `img_033`, `img_038`), phản chiếu (`img_020`), hàng quá khổ (`img_029`, `img_035`), đám đông (`img_021`, `img_032`) |
+| `v0.2-105` | `2026-11-16` | `105` | Đồng bộ tên 9 lớp (`three_wheeler`, `bus`, `bicycle`) và đầy đủ 3 thuộc tính trên cả 8 lớp đối tượng theo cấu hình CVAT mới nhất và `taxonomy.json` (`v1.0`) | Cập nhật thống nhất cấu trúc nhãn giữa Project CVAT và repo (`cvat/labels_generated.json`) |
 
 #### Checklist Tự kiểm (Pha 1 & Chuẩn `ground-truth-collector`)
 - [x] Khảo sát toàn bộ 40 ảnh (`img_001.jpg` – `img_040.jpg`) trước khi vẽ box.
